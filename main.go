@@ -2,9 +2,11 @@ package main
 
 import (
 	"bufio"
-	"fmt"
+	_fmt "fmt"
 	"log"
 	"net"
+
+	"github.com/athoune/audisp-go/fmt"
 )
 
 func main() {
@@ -20,7 +22,17 @@ func main() {
 			log.Println(err)
 			return
 		}
-		fmt.Println(text)
+		line := fmt.New(text)
+		_fmt.Println()
+		_fmt.Println(text)
+		for line.Next() {
+			err := line.Error()
+			if err != nil {
+				_fmt.Println("Error :", err)
+			}
+			k, v := line.KeyValue()
+			_fmt.Printf("%s => %s\n", k, v)
+		}
 	}
 
 }

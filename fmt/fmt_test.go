@@ -2,7 +2,6 @@ package fmt
 
 import (
 	"fmt"
-	"io"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -10,42 +9,66 @@ import (
 
 func TestNaked(t *testing.T) {
 	f := New(`pid=147491`)
-	k, v, err := f.Next()
-	assert.NoError(t, err)
+	assert.True(t, f.Next())
+	assert.NoError(t, f.Error())
+	k, v := f.KeyValue()
 	assert.Equal(t, "pid", k)
 	assert.Equal(t, "147491", v)
-	_, _, err = f.Next()
-	assert.Equal(t, io.EOF, err)
+	assert.False(t, f.Next())
 }
 
+func TestChariotReturn(t *testing.T) {
+	f := New("pid=147491\n")
+	assert.True(t, f.Next())
+	assert.NoError(t, f.Error())
+	k, v := f.KeyValue()
+	assert.Equal(t, "pid", k)
+	assert.Equal(t, "147491", v)
+	assert.False(t, f.Next())
+}
+func TestSpaces(t *testing.T) {
+	f := New(`pid=147491 name=auditd`)
+	assert.True(t, f.Next())
+	assert.NoError(t, f.Error())
+	k, v := f.KeyValue()
+	assert.Equal(t, "pid", k)
+	assert.Equal(t, "147491", v)
+
+	assert.True(t, f.Next())
+	assert.NoError(t, f.Error())
+	k, v = f.KeyValue()
+	assert.Equal(t, "name", k)
+	assert.Equal(t, "auditd", v)
+	assert.False(t, f.Next())
+}
 func TestDouble(t *testing.T) {
 	f := New(`name="John Doe"`)
-	k, v, err := f.Next()
-	assert.NoError(t, err)
+	assert.True(t, f.Next())
+	assert.NoError(t, f.Error())
+	k, v := f.KeyValue()
 	assert.Equal(t, "name", k)
 	assert.Equal(t, "John Doe", v)
-	_, _, err = f.Next()
-	assert.Equal(t, io.EOF, err)
+	assert.False(t, f.Next())
 }
 
 func TestSimple(t *testing.T) {
 	f := New(`name='Mister X'`)
-	k, v, err := f.Next()
-	assert.NoError(t, err)
+	assert.True(t, f.Next())
+	assert.NoError(t, f.Error())
+	k, v := f.KeyValue()
 	assert.Equal(t, "name", k)
 	assert.Equal(t, "Mister X", v)
-	_, _, err = f.Next()
-	assert.Equal(t, io.EOF, err)
+	assert.False(t, f.Next())
 }
 
 func TestFmt(t *testing.T) {
-	f := New(`node=sd-127470 type=USER_START msg=audit(1648302613.336:67497): pid=147491 uid=0 auid=1000 ses=117 msg='op=PAM:session_open grantors=pam_selinux,pam_loginuid,pam_keyinit,pam_permit,pam_umask,pam_unix,pam_systemd,pam_mail,pam_limits,pam_env,pam_env,pam_selinux acct="mlecarme" exe="/usr/sbin/sshd" hostname=88.123.196.115 addr=88.123.196.115 terminal=ssh res=success'`)
-	for {
-		k, v, err := f.Next()
-		if err == io.EOF {
-			break
-		}
-		fmt.Println(k, v)
+	f := New(`type=USER_LOGIN msg=audit(1648319421.985:67697): pid=164731 uid=0 auid=4294967295 ses=4294967295 msg='op=login acct="root" exe="/usr/sbin/sshd" hostname=? addr=104.194.75.112 terminal=sshd res=failed'`)
+	cpt := 0
+	for f.Next() {
+		assert.NoError(t, f.Error())
+		k, v := f.KeyValue()
+		fmt.Printf("[%s] : [%s]\n", k, v)
+		cpt++
 	}
-	assert.False(t, true)
+	assert.Equal(t, 7, cpt)
 }
