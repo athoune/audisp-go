@@ -1,30 +1,24 @@
 package main
 
 import (
-	"bufio"
 	_fmt "fmt"
-	"log"
-	"net"
 
-	"github.com/athoune/audisp-go/fmt"
+	"github.com/athoune/audisp-go/audisp"
 )
 
 func main() {
-	conn, err := net.Dial("unix", "/var/run/audispd_events")
+	a, err := audisp.New("/var/run/audispd_events")
 	if err != nil {
 		panic(err)
 	}
-	defer conn.Close()
-	reader := bufio.NewReader(conn)
+	defer a.Close()
 	for {
-		text, err := reader.ReadString('\n')
+		line, err := a.Line()
 		if err != nil {
-			log.Println(err)
-			return
+			_fmt.Println("Error :", err)
+			break
 		}
-		line := fmt.New(text)
 		_fmt.Println()
-		_fmt.Println(text)
 		for line.Next() {
 			err := line.Error()
 			if err != nil {
@@ -34,5 +28,4 @@ func main() {
 			_fmt.Printf("%s => %s\n", k, v)
 		}
 	}
-
 }
