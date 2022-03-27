@@ -23,6 +23,7 @@ func main() {
 			err := line.Error()
 			if err != nil {
 				_fmt.Println("Error :", err)
+				continue
 			}
 			k, v := line.KeyValue()
 			_fmt.Printf("%s => %s\n", k, v)
