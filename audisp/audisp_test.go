@@ -1,7 +1,9 @@
 package audisp
 
 import (
+	"fmt"
 	"net"
+	"path"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -14,7 +16,8 @@ func TestMain(m *testing.M) {
 
 func TestAudisp(t *testing.T) {
 	folder := t.TempDir()
-	l, err := net.Listen("unix", folder+"/socket")
+	mySocket := path.Join(folder, "socket")
+	l, err := net.Listen("unix", mySocket)
 	assert.NoError(t, err)
 	msg := make(chan string, 10)
 	stop := make(chan interface{})
@@ -24,17 +27,18 @@ func TestAudisp(t *testing.T) {
 		for {
 			select {
 			case m := <-msg:
-				conn.Write([]byte(m + "\n"))
+				_, err = fmt.Fprintf(conn, "%s\n", m)
+				assert.NoError(t, err)
 			case <-stop:
 				return // stop the goroutine
 			}
 		}
 	}()
-	a, err := New(folder + "/socket")
+	a, err := New(mySocket)
 	assert.NoError(t, err)
 	defer a.Close()
 	msg <- "app=boo"
-	msg <- "name='Bon Sinclar"
+	msg <- "name='Bob Sinclar'"
 	line, err := a.Line()
 	assert.NoError(t, err)
 	cpt := 0
