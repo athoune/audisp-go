@@ -14,6 +14,7 @@ type Fmt struct {
 	err   error
 }
 
+// New audisp line format reader
 func New(txt string) *Fmt {
 	if txt[len(txt)-1] == '\n' {
 		txt = txt[:len(txt)-1]
