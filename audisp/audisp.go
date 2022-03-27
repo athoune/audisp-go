@@ -26,11 +26,11 @@ func New(path string) (*Audisp, error) {
 
 // Line read one line
 func (a *Audisp) Line() (*fmt.Fmt, error) {
-	text, err := a.reader.ReadString('\n')
+	line, err := a.reader.ReadString('\n')
 	if err != nil {
 		return nil, err
 	}
-	return fmt.New(text), nil
+	return fmt.New(line), nil
 }
 
 // Close the UNIX socket connection
