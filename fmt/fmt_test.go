@@ -61,6 +61,18 @@ func TestSimple(t *testing.T) {
 	assert.False(t, f.Next())
 }
 
+func TestUnclosed(t *testing.T) {
+	f := New(`name='Lora Croft`)
+	assert.False(t, f.Next())
+	assert.Error(t, f.Error())
+}
+
+func TestNoKey(t *testing.T) {
+	f := New(`name Casimir`)
+	assert.False(t, f.Next())
+	assert.Error(t, f.Error())
+}
+
 func TestFmt(t *testing.T) {
 	f := New(`type=USER_LOGIN msg=audit(1648319421.985:67697): pid=164731 uid=0 auid=4294967295 ses=4294967295 msg='op=login acct="root" exe="/usr/sbin/sshd" hostname=? addr=104.194.75.112 terminal=sshd res=failed'`)
 	cpt := 0
