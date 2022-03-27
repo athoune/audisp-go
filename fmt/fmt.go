@@ -40,6 +40,7 @@ func (f *Fmt) Next() bool {
 		poz = strings.Index(f.txt[f.poz+2:], string(first))
 		if poz == -1 {
 			f.err = fmt.Errorf("can't find %v at %d", first, f.poz+2)
+			return false
 		}
 		f.value = f.txt[f.poz+2 : f.poz+poz+2]
 		poz += 2
