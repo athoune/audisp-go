@@ -2,6 +2,9 @@ Audisp-go
 =========
 
 [![Build Status](https://drone.garambrogne.net/api/badges/athoune/audisp-go/status.svg)](https://drone.garambrogne.net/athoune/audisp-go)
+[![go-report](https://goreportcard.com/badge/github.com/athoune/audisp-go)](https://goreportcard.com/report/github.com/athoune/audisp-go)
+
+[Godoc](https://pkg.go.dev/github.com/athoune/audisp-go)
 
 `audisp` client for Linux auditd `service`.
 
