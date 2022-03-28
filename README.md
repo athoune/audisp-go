@@ -1,6 +1,8 @@
 Audisp-go
 =========
 
+[![Build Status](https://drone.garambrogne.net/api/badges/athoune/audisp-go/status.svg)](https://drone.garambrogne.net/athoune/audisp-go)
+
 `audisp` client for Linux auditd `service`.
 
 Test it
