@@ -24,6 +24,7 @@ func New(txt string) *Fmt {
 	}
 }
 
+// Next element of the current line
 func (f *Fmt) Next() bool {
 	if f.poz >= len(f.txt) {
 		return false
@@ -55,6 +56,7 @@ func (f *Fmt) Next() bool {
 	return true
 }
 
+// KeyValue current element's key and value
 func (f *Fmt) KeyValue() (string, string) {
 	return f.key, f.value
 }
