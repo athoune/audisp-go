@@ -1,6 +1,7 @@
 package sshd
 
 import (
+	"encoding/hex"
 	"fmt"
 
 	"github.com/athoune/audisp-go/audisp"
@@ -35,6 +36,13 @@ func (s Sshds) Snitch(a *audisp.Audisp) error {
 		}
 		_, ok := s[m.ID]
 		if ok {
+			if m.Values["type"] == "PROCTITLE" {
+				s, err := hex.DecodeString(m.Values["proctitle"])
+				if err != nil {
+					return err
+				}
+				fmt.Println("proc title", string(s))
+			}
 			fmt.Println(m.ID, m.Values)
 		}
 

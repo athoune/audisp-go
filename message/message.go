@@ -1,5 +1,11 @@
 package message
 
+/*
+
+See https://access.redhat.com/articles/4409591#audit-event-fields-1
+
+*/
+
 import (
 	"strings"
 	"time"
