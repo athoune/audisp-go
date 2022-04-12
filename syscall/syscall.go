@@ -8,10 +8,10 @@ import (
 	"strings"
 )
 
+// New return syscall list
 func New() []string {
 	s, _ := syscall("/usr/include/x86_64-linux-gnu/asm/unistd_64.h")
 	return s
-
 }
 
 type line struct {
