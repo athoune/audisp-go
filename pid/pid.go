@@ -4,39 +4,65 @@ import (
 	"bufio"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"os"
-	"strconv"
+	"regexp"
 	"strings"
+
+	"log"
 )
 
-func SonOf(pid uint) ([]uint64, error) {
-	sons := make([]uint64, 0)
-	f, err := os.Open(fmt.Sprintf("/proc/%d/stats", pid))
+var Numbers *regexp.Regexp
+
+func init() {
+	Numbers = regexp.MustCompile(`\d+`)
+}
+
+func SonOf(pid string) ([]string, error) {
+	sons := make([]string, 0)
+
+	files, err := ioutil.ReadDir("/proc")
 	if err != nil {
 		return nil, err
 	}
+	for _, file := range files {
+		if file.IsDir() && Numbers.Match([]byte(file.Name())) {
+			p, err := ppid(file.Name())
+			if err != nil {
+				// yolo
+				log.Println(err)
+				continue
+			}
+			if p == pid {
+				sons = append(sons, file.Name())
+			}
+		}
+	}
+	return sons, nil
+}
+
+func ppid(pid string) (string, error) {
+	f, err := os.Open(fmt.Sprintf("/proc/%s/status", pid))
+	if err != nil {
+		return "", err
+	}
 	defer f.Close()
 	reader := bufio.NewReader(f)
-	spid := fmt.Sprintf("%d", pid)
+	return statusPpid(reader)
+}
+
+func statusPpid(reader *bufio.Reader) (string, error) {
 	for {
 		line, err := reader.ReadString('\n')
 		if err != nil {
 			if err == io.EOF {
 				break
 			}
-			return nil, err
+			return "", err
 		}
-		blobs := strings.Split(line, ":")
-		if blobs[0] == "PPid" {
-			value := strings.TrimLeft(blobs[1], " ")
-			if value == spid {
-				ppid, err := strconv.ParseUint(value, 10, 64)
-				if err != nil {
-					return nil, err
-				}
-				sons = append(sons, ppid)
-			}
+		if strings.HasPrefix(line, "PPid") {
+			return strings.TrimLeft(strings.Split(line[:len(line)-1], ":")[1], "\t"), nil
 		}
 	}
-	return sons, nil
+	return "", fmt.Errorf("can't find ppid")
 }
