@@ -57,6 +57,18 @@ func (m *Message) Get(key string) (string, bool) {
 	return "", false
 }
 
+func (m *Message) Fetch(k interface{}) interface{} {
+	kk, ok := k.(string)
+	if !ok {
+		return nil
+	}
+	v, ok := m.Get(kk)
+	if !ok {
+		return nil
+	}
+	return v
+}
+
 func (m *Messages) Next() bool {
 	m.currentLine, m.currentError = m.audisp.Line()
 	return m.currentError == nil
