@@ -1,40 +1,12 @@
 package message
 
 import (
-	_fmt "fmt"
-	"io"
-	"strings"
+	"fmt"
 	"testing"
-
-	"github.com/athoune/audisp-go/fmt"
 )
 
-type messagesMockup struct {
-	msgs []string
-	poz  int
-}
-
-func new(txt string) *messagesMockup {
-	return &messagesMockup{
-		strings.Split(txt, "\n"),
-		0,
-	}
-}
-
-func (m *messagesMockup) Close() error {
-	return nil
-}
-
-func (m *messagesMockup) Line() (*fmt.Fmt, error) {
-	m.poz++
-	if m.poz >= len(m.msgs) {
-		return nil, io.EOF
-	}
-	return fmt.New(m.msgs[m.poz-1]), nil
-}
-
 func TestMessage(t *testing.T) {
-	messages := new(
+	messages := NewMessagesMockup(
 		`type=SYSCALL msg=audit(1649877826.389:602570): arch=c000003e syscall=59 success=yes exit=0 a0=564757dfee20 a1=564757cfd320 a2=564757e1ecf0 a3=8 items=2 ppid=2100871 pid=2109512 auid=1000 uid=1000 gid=1000 euid=1000 suid=1000 fsuid=1000 egid=1000 sgid=1000 fsgid=1000 tty=pts2 ses=710 comm="curl" exe="/usr/bin/curl" key="susp_activity"
 type=EXECVE msg=audit(1649877826.389:602570): argc=2 a0="curl" a1="free.fr"
 type=PATH msg=audit(1649877826.389:602570): item=0 name="/usr/bin/curl" inode=18877655 dev=08:02 mode=0100755 ouid=0 ogid=0 rdev=00:00 nametype=NORMAL cap_fp=0 cap_fi=0 cap_fe=0 cap_fver=0 cap_frootid=0
@@ -45,6 +17,7 @@ type=SYSCALL msg=audit(1649877826.417:602571): arch=c000003e syscall=42 success=
 	reader := New(messages)
 	for reader.Next() {
 		msg := reader.Message()
-		_fmt.Println(msg)
+		fmt.Println(msg.Fetch("syscall"))
+		fmt.Println(msg)
 	}
 }

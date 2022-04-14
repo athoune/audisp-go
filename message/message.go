@@ -14,19 +14,26 @@ import (
 	"github.com/athoune/audisp-go/fmt"
 )
 
+type MessagesReader interface {
+	Next() bool
+	Error() error
+	Message() *Message
+}
+
 type Messages struct {
 	audisp       audisp.LineReader
 	currentLine  *fmt.Fmt
 	currentError error
 }
 
-func New(a audisp.LineReader) *Messages {
+func New(a audisp.LineReader) MessagesReader {
 	return &Messages{
 		audisp: a,
 	}
 }
 
 type Message struct {
+	raw       string
 	Type      string
 	TimeStamp time.Time
 	ID        uint
@@ -61,16 +68,14 @@ func (m *Messages) Error() error {
 
 func newMessage(line *fmt.Fmt) (*Message, error) {
 	m := &Message{
+		line:   line,
+		raw:    line.Raw(),
 		values: make(map[string]string),
 	}
-	line.Next()
-	k, v := line.KeyValue()
 	// assert k == Type
-	m.values[k] = v
-	m.Type = v
-	line.Next()
-	k, v = line.KeyValue()
+	m.Type, _ = m.Get("type")
 	// assert k = msg
+	v, _ := m.Get("msg")
 	a, err := audit.Parse(v)
 	if err != nil {
 		return nil, err
@@ -88,5 +93,4 @@ func (m *Messages) Message() *Message {
 		return nil
 	}
 	return mm
-
 }
