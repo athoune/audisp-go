@@ -7,6 +7,7 @@ import (
 	"github.com/antonmedv/expr"
 	"github.com/antonmedv/expr/vm"
 	"github.com/athoune/audisp-go/message"
+	"github.com/athoune/audisp-go/syscall"
 )
 
 type FilteredReader struct {
@@ -28,6 +29,14 @@ func New(code string, sonsToo bool, source message.MessagesReader) (message.Mess
 		vm:      &vm.VM{},
 		env: map[string]interface{}{
 			"sprintf": fmt.Sprintf,
+			"syscall": func(k string) interface{} {
+				for i, sc := range syscall.Syscalls {
+					if sc == k {
+						return i
+					}
+				}
+				return -1
+			},
 		},
 	}
 	var err error

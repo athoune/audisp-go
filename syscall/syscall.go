@@ -8,6 +8,8 @@ import (
 	"strings"
 )
 
+var Syscalls []string
+
 // New return syscall list
 func New() []string {
 	s, _ := syscall("/usr/include/x86_64-linux-gnu/asm/unistd_64.h")
@@ -24,9 +26,13 @@ func syscall(path string) ([]string, error) {
 	if err != nil {
 		return nil, err
 	}
+	return syscallReader(f)
+}
+
+func syscallReader(r io.Reader) ([]string, error) {
 	start := "#define __NR_"
 	size := len(start)
-	reader := bufio.NewReader(f)
+	reader := bufio.NewReader(r)
 	lines := make([]line, 0)
 	for {
 		l, err := reader.ReadString('\n')
