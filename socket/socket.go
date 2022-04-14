@@ -62,9 +62,12 @@ type Saddr struct {
 	Family string
 	IP     net.IP
 	Port   int32
+	// Just for inet6
+	FlowInfo string
+	ScopeId  string
 }
 
-func Parse4(txt string) (*Saddr, error) {
+func ParseSaddr(txt string) (*Saddr, error) {
 	i, _ := strconv.ParseInt(txt[:2], 16, 64)
 	ii, _ := strconv.ParseInt(txt[2:4], 16, 64)
 	i += 256 * ii
@@ -103,5 +106,21 @@ func parseInet(txt string) (*Saddr, error) {
 }
 
 func parseInet6(txt string) (*Saddr, error) {
-	return nil, nil
+	i, _ := strconv.ParseInt(txt[4:6], 16, 64)
+	ii, _ := strconv.ParseInt(txt[6:8], 16, 64)
+	port := i*256 + ii
+	flow_info := txt[8:16]
+	scope_id := txt[48:56]
+	ip := make(net.IP, 16)
+	for i := 0; i < 16; i++ {
+		ii, _ := strconv.ParseInt(txt[16+2*i:18+2*i], 16, 32)
+		ip[i] = byte(ii)
+	}
+	return &Saddr{
+		Family:   AddressFamilies[10],
+		IP:       ip,
+		Port:     int32(port),
+		FlowInfo: flow_info,
+		ScopeId:  scope_id,
+	}, nil
 }
