@@ -7,7 +7,6 @@ See https://access.redhat.com/articles/4409591#audit-event-fields-1
 */
 
 import (
-	"strings"
 	"time"
 
 	"github.com/athoune/audisp-go/audisp"
@@ -16,21 +15,39 @@ import (
 )
 
 type Messages struct {
-	audisp       *audisp.Audisp
+	audisp       audisp.LineReader
 	currentLine  *fmt.Fmt
 	currentError error
 }
 
-func New(a *audisp.Audisp) *Messages {
+func New(a audisp.LineReader) *Messages {
 	return &Messages{
 		audisp: a,
 	}
 }
 
 type Message struct {
-	ID        uint
+	Type      string
 	TimeStamp time.Time
-	Values    map[string]string
+	ID        uint
+	line      *fmt.Fmt
+	values    map[string]string
+}
+
+// Get is lazy
+func (m *Message) Get(key string) (string, bool) {
+	v, ok := m.values[key]
+	if ok {
+		return v, true
+	}
+	for m.line.Next() {
+		k, v := m.line.KeyValue()
+		m.values[k] = v
+		if k == key {
+			return v, true
+		}
+	}
+	return "", false
 }
 
 func (m *Messages) Next() bool {
@@ -42,27 +59,34 @@ func (m *Messages) Error() error {
 	return m.currentError
 }
 
-func (m *Messages) Message() *Message {
-	mm := &Message{
-		Values: make(map[string]string),
+func newMessage(line *fmt.Fmt) (*Message, error) {
+	m := &Message{
+		values: make(map[string]string),
 	}
-	for m.currentLine.Next() {
-		err := m.currentLine.Error()
-		if err != nil {
-			m.currentError = err
-			return nil
-		}
-		k, v := m.currentLine.KeyValue()
-		mm.Values[k] = v
-		if k == "msg" && strings.HasPrefix(v, "audit(") {
-			a, err := audit.Parse(v)
-			if err != nil {
-				m.currentError = err
-				return nil
-			}
-			mm.ID = a.ID
-			mm.TimeStamp = a.TimeStamp
-		}
+	line.Next()
+	k, v := line.KeyValue()
+	// assert k == Type
+	m.values[k] = v
+	m.Type = v
+	line.Next()
+	k, v = line.KeyValue()
+	// assert k = msg
+	a, err := audit.Parse(v)
+	if err != nil {
+		return nil, err
+	}
+	m.TimeStamp = a.TimeStamp
+	m.ID = a.ID
+	return m, nil
+}
+
+// Message return next Message
+func (m *Messages) Message() *Message {
+	mm, err := newMessage(m.currentLine)
+	if err != nil {
+		m.currentError = err
+		return nil
 	}
 	return mm
+
 }
