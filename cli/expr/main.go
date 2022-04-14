@@ -17,11 +17,11 @@ func main() {
 	defer a.Close()
 	reader, err := filter.New(os.Args[1], true, message.New(a))
 	for reader.Next() {
-		err := reader.Error()
-		if err != nil {
-			panic(err)
-		}
 		msg := reader.Message()
 		fmt.Println(msg.Raw())
+	}
+	err = reader.Error()
+	if err != nil {
+		panic(err)
 	}
 }
