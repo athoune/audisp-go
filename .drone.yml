@@ -5,5 +5,5 @@ steps:
 - name: test
   image: golang
   commands:
-  - go test -cover ./...
-  - go build
+  - make test
+  - make build-all

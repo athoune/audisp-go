@@ -18,7 +18,7 @@ func New() Sshds {
 	return make(Sshds)
 }
 
-func (s Sshds) Snitch(a *audisp.Audisp) error {
+func (s Sshds) Snitch(a audisp.LineReader) error {
 	messages := message.New(a)
 	for messages.Next() {
 		err := messages.Error()
@@ -26,8 +26,8 @@ func (s Sshds) Snitch(a *audisp.Audisp) error {
 			return err
 		}
 		m := messages.Message()
-		if m.Values["type"] == "EXECVE" {
-			c, ok := m.Values["a0"]
+		if m.Type == "EXECVE" {
+			c, ok := m.Get("a0")
 			if ok && c == "/usr/sbin/sshd" {
 				s[m.ID] = &Sshd{
 					ID: m.ID,
@@ -36,14 +36,15 @@ func (s Sshds) Snitch(a *audisp.Audisp) error {
 		}
 		_, ok := s[m.ID]
 		if ok {
-			if m.Values["type"] == "PROCTITLE" {
-				s, err := hex.DecodeString(m.Values["proctitle"])
+			if m.Type == "PROCTITLE" {
+				pt, _ := m.Get("proctitle")
+				s, err := hex.DecodeString(pt)
 				if err != nil {
 					return err
 				}
 				fmt.Println("proc title", string(s))
 			}
-			fmt.Println(m.ID, m.Values)
+			fmt.Println(m.Raw())
 		}
 
 	}
