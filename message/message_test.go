@@ -3,6 +3,8 @@ package message
 import (
 	"fmt"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestMessage(t *testing.T) {
@@ -15,9 +17,14 @@ type=PROCTITLE msg=audit(1649877826.389:602570): proctitle=6375726C00667265652E6
 type=SYSCALL msg=audit(1649877826.417:602571): arch=c000003e syscall=42 success=yes exit=0 a0=7 a1=7fc6e7469dcc a2=10 a3=ffffffffffffff0a items=0 ppid=2100871 pid=2109512 auid=1000 uid=1000 gid=1000 euid=1000 suid=1000 fsuid=1000 egid=1000 sgid=1000 fsgid=1000 tty=pts2 ses=710 comm="curl" exe="/usr/bin/curl" key="network_connect_4"
 `)
 	reader := New(messages)
+	cpt := 0
 	for reader.Next() {
 		msg := reader.Message()
 		fmt.Println(msg.Fetch("syscall"))
 		fmt.Println(msg)
+		cpt++
 	}
+	err := reader.Error()
+	assert.NoError(t, err)
+	assert.Equal(t, 6, cpt)
 }

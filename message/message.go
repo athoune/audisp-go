@@ -7,6 +7,7 @@ See https://access.redhat.com/articles/4409591#audit-event-fields-1
 */
 
 import (
+	"io"
 	"time"
 
 	"github.com/athoune/audisp-go/audisp"
@@ -33,7 +34,12 @@ func New(a audisp.LineReader) MessagesReader {
 }
 
 func (m *Messages) Next() bool {
-	m.currentLine, m.currentError = m.audisp.Line()
+	var err error
+	m.currentLine, err = m.audisp.Line()
+	if err != nil && err == io.EOF {
+		return false
+	}
+	m.currentError = err
 	return m.currentError == nil
 }
 
