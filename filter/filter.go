@@ -42,39 +42,38 @@ func New(code string, sonsToo bool, source message.MessagesReader) (message.Mess
 }
 
 func (f *FilteredReader) Next() bool {
-	n := f.source.Next()
-	if !n {
-		return false
-	}
-	f.current = f.source.Message()
-	if f.source.Error() != nil {
+	for {
+		n := f.source.Next()
 		f.err = f.source.Error()
-		return false
-	}
-	if f.sonsToo {
-		_, ok := f.ids[f.current.ID] // auditd is already exist
-		if ok {                      // it's a son
+		if !n {
+			return false
+		}
+		f.current = f.source.Message()
+		if f.sonsToo {
+			_, ok := f.ids[f.current.ID] // auditd is already exist
+			if ok {                      // it's a son
+				return true
+			}
+		}
+		f.env["line"] = f.current
+		out, err := f.vm.Run(f.program, f.env)
+		if err != nil {
+			f.err = err
+			return false
+		}
+		resp, ok := out.(bool)
+		if !ok {
+			f.err = fmt.Errorf("not a boolean : %v", resp)
+			return false
+		}
+		if resp {
+			_, ok := f.ids[f.current.ID]
+			if !ok {
+				f.ids[f.current.ID] = time.Now()
+			}
 			return true
 		}
 	}
-	f.env["line"] = f.current
-	out, err := f.vm.Run(f.program, f.env)
-	if err != nil {
-		f.err = err
-		return false
-	}
-	resp, ok := out.(bool)
-	if !ok {
-		f.err = fmt.Errorf("not a boolean : %v", resp)
-		return false
-	}
-	if resp {
-		_, ok := f.ids[f.current.ID]
-		if !ok {
-			f.ids[f.current.ID] = time.Now()
-		}
-	}
-	return resp
 }
 
 func (f *FilteredReader) Error() error {
