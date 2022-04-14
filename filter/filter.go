@@ -87,7 +87,7 @@ func (f *FilteredReader) Next() bool {
 }
 
 func (f *FilteredReader) Error() error {
-	return f.source.Error()
+	return f.err
 }
 
 func (f *FilteredReader) Message() *message.Message {
