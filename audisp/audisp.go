@@ -12,8 +12,13 @@ type Audisp struct {
 	reader *bufio.Reader
 }
 
+type LineReader interface {
+	Line() (*fmt.Fmt, error)
+	Close() error
+}
+
 // New return an Audisp instance, connected to a UNIX socket path to an audisp af_unix
-func New(path string) (*Audisp, error) {
+func New(path string) (LineReader, error) {
 	conn, err := net.Dial("unix", path)
 	if err != nil {
 		return nil, err
