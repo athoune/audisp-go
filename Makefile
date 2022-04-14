@@ -45,7 +45,8 @@ test:
 		github.com/athoune/audisp-go/fmt \
 		github.com/athoune/audisp-go/message \
 		github.com/athoune/audisp-go/pid \
-		github.com/athoune/audisp-go/syscall
+		github.com/athoune/audisp-go/syscall \
+		github.com/athoune/audisp-go/socket
 
 bin:
 	mkdir -p bin
