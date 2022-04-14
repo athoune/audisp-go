@@ -30,7 +30,6 @@ func New(code string, sonsToo bool, source message.MessagesReader) (message.Mess
 		env: map[string]interface{}{
 			"sprintf": fmt.Sprintf,
 			"syscall": func(k string) (interface{}, error) {
-				fmt.Println("syscall", k)
 				for i, sc := range syscall.Syscalls {
 					if sc == k {
 						return fmt.Sprintf("%d", i), nil
