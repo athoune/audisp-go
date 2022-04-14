@@ -64,3 +64,7 @@ func (f *Fmt) KeyValue() (string, string) {
 func (f *Fmt) Error() error {
 	return f.err
 }
+
+func (f *Fmt) Raw() string {
+	return f.txt
+}
