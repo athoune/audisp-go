@@ -13,6 +13,11 @@ build-sons: bin
 		-o bin/audisp-sons \
 	./cli/sons/main.go
 
+build-expr: bin
+	CGO_ENABLED=0 go build \
+		-o bin/audisp-expr \
+	./cli/expr/main.go
+
 build-linux:
 	make build GOOS=linux
 	if [ "upx not found" != "$(shell which upx)" ]; then upx bin/audisp; fi
@@ -24,6 +29,10 @@ build-sshd-linux:
 build-sons-linux:
 	make build-sons GOOS=linux
 	if [ "upx not found" != "$(shell which upx)" ]; then upx bin/audisp-sons; fi
+
+build-expr-linux:
+	make build-expr GOOS=linux
+	if [ "upx not found" != "$(shell which upx)" ]; then upx bin/audisp-expr; fi
 
 test:
 	go test -cover \
