@@ -16,6 +16,9 @@ func main() {
 	}
 	defer a.Close()
 	reader, err := filter.New(os.Args[1], true, message.New(a))
+	if err != nil {
+		panic(err)
+	}
 	for reader.Next() {
 		msg := reader.Message()
 		fmt.Println(msg.Raw())
