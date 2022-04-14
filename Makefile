@@ -18,6 +18,8 @@ build-expr: bin
 		-o bin/audisp-expr \
 	./cli/expr/main.go
 
+build-all: build-sshd build-sons build-expr
+
 build-linux:
 	make build GOOS=linux
 	if [ "upx not found" != "$(shell which upx)" ]; then upx bin/audisp; fi
