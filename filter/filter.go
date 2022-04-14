@@ -29,13 +29,14 @@ func New(code string, sonsToo bool, source message.MessagesReader) (message.Mess
 		vm:      &vm.VM{},
 		env: map[string]interface{}{
 			"sprintf": fmt.Sprintf,
-			"syscall": func(k string) interface{} {
+			"syscall": func(k string) (interface{}, error) {
+				fmt.Println("syscall", k)
 				for i, sc := range syscall.Syscalls {
 					if sc == k {
-						return i
+						return fmt.Sprintf("%d", i), nil
 					}
 				}
-				return -1
+				return -1, fmt.Errorf("unknown syscall: %s", k)
 			},
 		},
 	}
