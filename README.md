@@ -35,6 +35,6 @@ format = string
 You can now build and test:
 
     make
-    ./bin/audisp
+    ./bin/  audisp-expr 'line.type == "SYSCALL" and line.syscall == syscall("connect") and line.comm == "curl" '
 
-Do something that trigger auditd, like ssh connection, sudo something.
+Do something that trigger auditd, some curl
