@@ -7,7 +7,7 @@ import (
 )
 
 func TestSyscall(t *testing.T) {
-	s, err := syscall("../contrib/unistd_64.h")
+	s, err := syscall("linux_x86_64/unistd_64.h")
 	assert.NoError(t, err)
 	assert.Len(t, s, 436)
 }
